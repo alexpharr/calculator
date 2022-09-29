@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import './index.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import math, { evaluate } from "mathjs";
+import { evaluate } from "mathjs";
 
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
@@ -23,10 +23,10 @@ const Calculator = () => {
         // Don't allow input to start with multiple zeros
         if (display === '0' === value) return;
 
-        const newDisplay = display + value;
+        const newDisplay = (display === '0') ? value : display + value;
 
         try {
-            setResult(math.evaluate(newDisplay));
+            setResult(evaluate(newDisplay));
             setDisplay(newDisplay);
         } catch (error) {
             // Error thrown when expression ends in single operator, ex. "250*" or "5/"
@@ -40,7 +40,7 @@ const Calculator = () => {
             <Row><Display id="display" /></Row>
             <Row>
                 <div>
-                    <Button id="clear" onClick={setDisplay('0')}>AC</Button>
+                    <Button id="clear" onClick={() => setDisplay('0')}>AC</Button>
                     <Button>/</Button>
                     <Button>X</Button>
                 </div>
@@ -73,7 +73,7 @@ const Calculator = () => {
                 <div>
                     <Button id="zero">0</Button>
                     <Button id="decimal">.</Button>
-                    <Button id="equals" onClick={setDisplay(result.toString)}>=</Button>
+                    <Button id="equals" onClick={() => setDisplay(result)}>=</Button>
                     <Button>Test</Button>
                 </div>
             </Row>
