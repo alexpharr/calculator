@@ -12,8 +12,9 @@ import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Card from "react-bootstrap/Card";
 
+const OPERATOR = ['/', '*', '-', '+'];
 
-const Display = () => { return <Card>Test</Card> }
+const Display = (props) => { return <Card>{props.value}</Card> }
 
 const Calculator = () => {
     const [display, setDisplay] = useState('0');
@@ -23,56 +24,78 @@ const Calculator = () => {
         // Don't allow input to start with multiple zeros
         if (display === '0' === value) return;
 
-        const newDisplay = (display === '0') ? value : display + value;
+        let newDisplay = (display === '0') ? value : display + value;
+
+        if (value === '.' && display === '0') {
+            newDisplay = '0.'
+        }
+
+        if (value === '+' && OPERATOR.includes(display.slice(-1))) {
+            console.log('test');
+            newDisplay = display.slice(0, -1) + value;
+        }
 
         try {
             setResult(evaluate(newDisplay));
             setDisplay(newDisplay);
         } catch (error) {
-            // Error thrown when expression ends in single operator, ex. "250*" or "5/"
-            if (error.char > display.length) setDisplay(newDisplay);
+            
+            console.log(error.char);
+
+            // Error ignored when error is beyond the length of the display. For example 2* or 55/
+            if (error.char === newDisplay.length + 1) {
+                setDisplay(newDisplay);
+                return;
+            }
+
+            // When two operators are entered, the last operator entered should be shown
+            if (OPERATOR.includes(newDisplay[error.char - 1])) {
+                newDisplay = display.slice(0, -1) + value;
+                setDisplay(newDisplay);
+            }
+
             return;
         }
     }
 
     return (
         <Container>
-            <Row><Display id="display" /></Row>
+            <Row><Display id="display" value={display} /></Row>
             <Row>
                 <div>
                     <Button id="clear" onClick={() => setDisplay('0')}>AC</Button>
-                    <Button>/</Button>
-                    <Button>X</Button>
+                    <Button onClick={() => addToDisplay('/')}>/</Button>
+                    <Button onClick={() => addToDisplay('*')}>X</Button>
                 </div>
             </Row>
             <Row>
                 <div>
-                    <Button id="seven">7</Button>
-                    <Button id="eight">8</Button>
-                    <Button id="nine">9</Button>
-                    <Button id="subtract">-</Button>
+                    <Button id="seven" onClick={() => addToDisplay('7')}>7</Button>
+                    <Button id="eight" onClick={() => addToDisplay('8')}>8</Button>
+                    <Button id="nine" onClick={() => addToDisplay('9')}>9</Button>
+                    <Button id="subtract" onClick={() => addToDisplay('-')}>-</Button>
                 </div>
             </Row>
             <Row>
                 <div>
-                    <Button id="four">4</Button>
-                    <Button id="five">5</Button>
-                    <Button id="six">6</Button>
-                    <Button id="add">+</Button>
+                    <Button id="four" onClick={() => addToDisplay('4')}>4</Button>
+                    <Button id="five" onClick={() => addToDisplay('5')}>5</Button>
+                    <Button id="six" onClick={() => addToDisplay('6')}>6</Button>
+                    <Button id="add" onClick={() => addToDisplay('+')}>+</Button>
                 </div>
             </Row>
             <Row>
                 <div>
-                    <Button id="one">1</Button>
-                    <Button id="two">2</Button>
-                    <Button id="three">3</Button>
+                    <Button id="one" onClick={() => addToDisplay('1')}>1</Button>
+                    <Button id="two" onClick={() => addToDisplay('2')}>2</Button>
+                    <Button id="three" onClick={() => addToDisplay('3')}>3</Button>
                     <Button>Test</Button>
                 </div>
             </Row>
             <Row>
                 <div>
-                    <Button id="zero">0</Button>
-                    <Button id="decimal">.</Button>
+                    <Button id="zero" onClick={() => addToDisplay('0')}>0</Button>
+                    <Button id="decimal" onClick={() => addToDisplay('.')}>.</Button>
                     <Button id="equals" onClick={() => setDisplay(result)}>=</Button>
                     <Button>Test</Button>
                 </div>
